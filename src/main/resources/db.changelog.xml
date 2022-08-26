@@ -29,6 +29,9 @@
             <column name="phone" type="VARCHAR(255)">
                 <constraints nullable="false"/>
             </column>
+            <column name="active" defaultValue="true" type="boolean">
+                <constraints nullable="false"/>
+            </column>
             <column name="status" type="varchar(255)"/>
         </createTable>
     </changeSet>
@@ -154,23 +157,7 @@
             INSERT INTO public.employees_vaccines
             (id, employee_id, vaccine_id, "date", dose)
             VALUES('0b8026e5-2c45-41c4-9954-2cce24df3ca4', 'fb640de9-3fd3-4d18-8f77-7e98c96a5c9a',
-            '4b4f4d49-38ab-43a1-a627-1df2bfff74c6', '2022-08-06 07:58:04', '1');
-
-            INSERT INTO public.employees_vaccines
-            (id, employee_id, vaccine_id, "date", dose)
-            VALUES('22513150-6b32-4c9a-bf78-85a0e63b8e8f', 'fb640de9-3fd3-4d18-8f77-7e98c96a5c9a',
-            '21e1e94c-a9b6-4711-8e7a-a0e933a1612c', '2022-08-26 10:23:12', '2');
-
-            INSERT INTO public.employees_vaccines
-            (id, employee_id, vaccine_id, "date", dose)
-            VALUES('37189e23-b218-41e9-adcb-9a060b06fbd7', 'fb640de9-3fd3-4d18-8f77-7e98c96a5c9a',
-            '00c1dcca-53bd-49c1-8903-eb6e5fe10117', '2022-08-26 10:23:12', '3');
-
-            INSERT INTO public.employees_vaccines
-            (id, employee_id, vaccine_id, "date", dose)
-            VALUES('cc8d9f17-7b04-4d5e-92e8-bb383da027ed', 'fb640de9-3fd3-4d18-8f77-7e98c96a5c9a',
-            'e90ad64c-6699-403c-908b-2c3dcde625f6', '2022-08-26 10:23:12', '4');
-
+            '4b4f4d49-38ab-43a1-a627-1df2bfff74c6', '2022-08-06 07:58:04', '3');
 
             INSERT INTO public.roles
             (id, "name")

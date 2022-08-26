@@ -5,6 +5,7 @@ import com.pedro.arauz.entity.Employee;
 import com.pedro.arauz.entity.EmployeeVaccine;
 import com.pedro.arauz.presentation.presenter.EmployeePresenter;
 import com.pedro.arauz.presentation.presenter.EmployeeVaccinePresenter;
+import com.pedro.arauz.presentation.presenter.Paginator;
 import com.pedro.arauz.repository.EmployeeRepository;
 import com.pedro.arauz.service.EmployeeService;
 import com.pedro.arauz.service.EmployeeVaccineService;
@@ -12,6 +13,10 @@ import com.pedro.arauz.service.UserService;
 import com.pedro.arauz.service.VaccineService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -61,6 +66,7 @@ public class EmployeeServiceImpl implements EmployeeService {
         employee.setAddress(employeePresenter.getAddress());
         employee.setPhone(employeePresenter.getPhone());
         employee.setStatus(Status.valueOf(employeePresenter.getStatus()));
+        employee.setActive(employeePresenter.getActive());
         employee = employeeRepository.save(employee);
         if (!employeePresenter.getEmployeeVaccinePresenters().isEmpty()) {
             Set<EmployeeVaccine> employeeVaccines = new HashSet<>();
@@ -83,9 +89,9 @@ public class EmployeeServiceImpl implements EmployeeService {
     @Override
     public List<EmployeePresenter> findAll() {
         List<EmployeePresenter> employeePresenters = new ArrayList<>();
-        employeeRepository.findAll().forEach(employee -> {
+        employeeRepository.findByActiveTrue().forEach(employee -> {
             try {
-                employeePresenters.add(employeeToEmployeePresenter(employee));
+                employeePresenters.add(employeeToEmployeePresenter(employee.get()));
             } catch (ParseException e) {
                 e.printStackTrace();
             }
@@ -118,7 +124,72 @@ public class EmployeeServiceImpl implements EmployeeService {
                 .address(employee.getAddress())
                 .phone(employee.getPhone())
                 .status(employee.getStatus().name())
+                .active(employee.getActive())
                 .employeeVaccinePresenters(employeeVaccinePresenter)
                 .build();
+    }
+
+    @Override
+    public String delete(UUID id) {
+        Optional<Employee> employee = employeeRepository.findById(id);
+        if (employee.isPresent()) {
+            employee.get().setActive(false);
+            employeeRepository.save(employee.get());
+            return "deleted correctly";
+        }
+        return "employee not found";
+    }
+
+    @Override
+    public Paginator getPaginatedEmployees(String searchValue, Date initDate, Date endDate, String status, Integer page, Integer size) {
+
+        Pageable pageable = null;
+        Page<Employee> employeePages = null;
+        List<EmployeePresenter> employeePresenters = new ArrayList<>();
+        Status[] vaccineStatus = status.isEmpty() ? new Status[]{Status.VACUNADO, Status.NO_VACUNADO} : status.equals("VACUNADO") ? new Status[]{Status.VACUNADO} : new Status[]{Status.NO_VACUNADO};
+        pageable = PageRequest.of(page, size);
+        employeePages = employeeRepository.findByFilters(searchValue, initDate, endDate, vaccineStatus, pageable);
+        employeePages.getContent().forEach(employee -> {
+            employeePresenters.add(EmployeePresenter.builder()
+                            .id(employee.getId())
+                            .active(employee.getActive())
+                            .address(employee.getAddress())
+                            .dni(employee.getDni())
+                            .dateOfBirth(employee.getDateOfBirth().toString())
+                            .firstName(employee.getFirstName())
+                            .lastName(employee.getLastName())
+                            .phone(employee.getPhone())
+                            .status(employee.getStatus().toString())
+                    .build());
+        });
+
+        Set<EmployeePresenter> treeSet = new TreeSet<>(new Comparator<EmployeePresenter>() {
+            @Override
+            public int compare(EmployeePresenter employeePresenter, EmployeePresenter t1) {
+                return employeePresenter.getActive().compareTo(t1.getActive()) * -1;
+            }
+        });
+        treeSet.addAll(employeePresenters);
+        Paginator paginatorEmployeePresenter = new Paginator(employeePages.getTotalPages(), employeePages.getTotalElements(), treeSet);
+
+        return paginatorEmployeePresenter;
+    }
+
+    @Override
+    public List<EmployeePresenter> getEmployeeByStatus(String status) {
+        List<EmployeePresenter> employeesPresenter = new ArrayList<>();
+        List<Employee> employees = new ArrayList<>();
+        Status[] vaccineStatus = status.isEmpty() ? new Status[]{Status.VACUNADO, Status.NO_VACUNADO} : status.equals("VACUNADO") ? new Status[]{Status.VACUNADO} : new Status[]{Status.NO_VACUNADO};
+        employees = employeeRepository.findByStatus(vaccineStatus);
+        employees.stream().forEach(employee -> {
+            EmployeePresenter employeePresenter = new EmployeePresenter();
+            try {
+                employeePresenter = employeeToEmployeePresenter(employee);
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+            employeesPresenter.add(employeePresenter);
+        });
+        return employeesPresenter;
     }
 }

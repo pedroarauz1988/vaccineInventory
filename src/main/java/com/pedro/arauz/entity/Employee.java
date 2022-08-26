@@ -39,6 +39,8 @@ public class Employee {
 
     private String phone;
 
+    private Boolean active;
+
     @Enumerated(EnumType.STRING)
     private Status status;
 

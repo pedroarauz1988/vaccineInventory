@@ -25,6 +25,7 @@ public class EmployeePresenter {
     private String mail;
     private String status;
     private String phone;
+    private Boolean active;
     @Builder.Default
     private List<EmployeeVaccinePresenter> employeeVaccinePresenters = new ArrayList<>();
 }

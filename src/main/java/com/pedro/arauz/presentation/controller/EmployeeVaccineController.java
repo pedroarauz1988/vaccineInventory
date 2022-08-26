@@ -5,9 +5,7 @@ import com.pedro.arauz.service.EmployeeVaccineService;
 import com.sun.istack.NotNull;
 import lombok.Generated;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
@@ -23,9 +21,8 @@ public class EmployeeVaccineController {
         return employeeVaccineService.employeeVaccineToEmployeeVaccinePresenter(employeeVaccineService.saveEmployeeVaccine(employeeVaccineService.employeeVaccinePresenterToEmployeeVaccine(employeeVaccinePresenter)));
     }
 
-    @PostMapping("/deleteEmployeeVaccine")
-    public String saveEmployee(@RequestBody @NotNull String id) {
+    @GetMapping("/deleteEmployeeVaccine")
+    public String saveEmployee(@RequestParam @NotNull String id) {
         return employeeVaccineService.delete(UUID.fromString(id));
     }
-
 }
